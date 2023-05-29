@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from .forms import SignUpForm, LoginForm
-
+from .forms import SignUpForm, LoginForm, RiosForm
 
 # Create your views here.
 from django.views import View
@@ -100,6 +99,33 @@ class LoginView(View):
                     return JsonResponse(data={'status': False, 'descricao': 'Usuário ou senha inválidos.'}, safe=False)
         else:
             return JsonResponse(data={'status': False}, safe=False)
+
+class RiosUsuarioView(View):
+    def get(self, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            form = RiosForm()
+            return render(self.request, 'rios.html', {'form': form})
+        else:
+            return redirect('login')
+
+    def post(self, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            form = RiosForm(self.request.POST)
+            if form.is_valid():
+                rios_form = form.cleaned_data.get("rios_field")
+                user_obj = core.models.Usuario.objects.filter(email=self.request.user.email).first()
+                core.models.RioUsuario.objects.filter(usuario=user_obj).delete()
+                for rio in rios_form:
+                    rio_obj = core.models.Rio.objects.filter(id=rio).first()
+                    rio_usuario = core.models.RioUsuario()
+                    rio_usuario.rio = rio_obj
+                    rio_usuario.usuario = user_obj
+                    rio_usuario.save()
+                return redirect('home')
+            else:
+                return JsonResponse(data={'status': False}, safe=False)
+        else:
+            return redirect('login')
 
 
 class EnvioDados(View):

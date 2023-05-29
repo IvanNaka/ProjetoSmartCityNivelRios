@@ -30,3 +30,14 @@ class SignUpForm(forms.Form):
 class LoginForm(forms.Form):
     email = forms.CharField(label='Email', max_length=100)
     password = forms.CharField(label='Senha', widget=forms.PasswordInput)
+
+
+ESCOLHAS_RIOS =(
+    ("1", "Rio Piraquara"),
+    ("2", "Rio Barigui"),
+    ("3", "Rio Atuba "),
+)
+
+
+class RiosForm(forms.Form):
+    rios_field = forms.MultipleChoiceField(choices=ESCOLHAS_RIOS)
