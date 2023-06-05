@@ -21,7 +21,7 @@ class Home(View):
         for esp in ls_esps:
             dados_rio = core.models.MedicoesRio.objects.values(
                 'esp32_id', 'altura', 'dat_medicao', nm_rio=F('esp32_id__rio__nome')
-            ).filter(id=esp['id']).order_by('-dat_medicao').first()
+            ).filter(esp32_id=esp['id']).order_by('-dat_medicao').first()
             infos_rios.append(dados_rio)
         qtd_rios_acima = len(list(core.models.MedicoesRio.objects.filter(altura__gte=1.5)))
         qtd_rios_abaixo = len(list(core.models.MedicoesRio.objects.filter(altura__lte=1.0)))
