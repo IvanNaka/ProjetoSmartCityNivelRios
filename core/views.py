@@ -169,7 +169,7 @@ class EnvioDados(View):
             #         pass
             response = {'status': True}
         except Exception as e:
-            response = {'status': False, 'descricao': [self.request.GET]}
+            response = {'status': False, 'descricao': [esp32_id, sensor_1]}
         return JsonResponse(response, safe=False)
 
 
