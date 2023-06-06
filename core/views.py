@@ -15,17 +15,21 @@ import core.models
 
 class Home(View):
     def get(self, *args, **kwargs):
-
         ls_esps = list(core.models.Esp32.objects.values('id'))
+        qtd_rios_acima = 0
+        qtd_rios_abaixo = 0
         infos_rios = []
         for esp in ls_esps:
             dados_rio = core.models.MedicoesRio.objects.values(
                 'esp32_id', 'altura', 'dat_medicao', nm_rio=F('esp32_id__rio__nome')
             ).filter(esp32_id=esp['id']).order_by('-dat_medicao').first()
             infos_rios.append(dados_rio)
-        qtd_rios_acima = len(list(core.models.MedicoesRio.objects.filter(altura__gte=1.5)))
-        qtd_rios_abaixo = len(list(core.models.MedicoesRio.objects.filter(altura__lte=1.0)))
-
+        for esp in ls_esps:
+            altura = core.models.MedicoesRio.objects.values_list('altura', flat=True).filter(esp32_id=esp['id']).order_by('-dat_medicao').first()
+            if altura >= 2:
+                qtd_rios_acima = qtd_rios_acima + 1
+            elif altura <= 1:
+                qtd_rios_abaixo = qtd_rios_abaixo + 1
         context = {
             'infos_rios': infos_rios,
             'qtd_rios_acima': qtd_rios_acima,
