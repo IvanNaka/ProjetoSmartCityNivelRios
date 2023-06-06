@@ -1,5 +1,5 @@
 import datetime
-
+import smtplib
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models import F
@@ -131,38 +131,47 @@ class RiosUsuarioView(View):
 class EnvioDados(View):
     def post(self, *args, **kwargs):
         try:
-            esp32_id = self.request.POST.get('esp32_id')
-            sensor_1 = int(self.request.POST.get('sensor_1')) if self.request.POST.get('sensor_1') else None
-            sensor_2 = int(self.request.POST.get('sensor_2')) if self.request.POST.get('sensor_2') else None
-            sensor_3 = int(self.request.POST.get('sensor_3')) if self.request.POST.get('sensor_3') else None
-            sensor_4 = int(self.request.POST.get('sensor_4')) if self.request.POST.get('sensor_4') else None
-            sensor_5 = int(self.request.POST.get('sensor_5')) if self.request.POST.get('sensor_5') else None
-            sensor_6 = int(self.request.POST.get('sensor_6')) if self.request.POST.get('sensor_6') else None
-            sensor_7 = int(self.request.POST.get('sensor_7')) if self.request.POST.get('sensor_7') else None
-            sensor_8 = int(self.request.POST.get('sensor_8')) if self.request.POST.get('sensor_8') else None
-            sensor_9 = int(self.request.POST.get('sensor_9')) if self.request.POST.get('sensor_9') else None
-            sensor_10 = int(self.request.POST.get('sensor_10')) if self.request.POST.get('sensor_10') else None
-            sensor_11 = int(self.request.POST.get('sensor_11')) if self.request.POST.get('sensor_11') else None
-            sensor_12 = int(self.request.POST.get('sensor_12')) if self.request.POST.get('sensor_12') else None
-            sensor_13 = int(self.request.POST.get('sensor_13')) if self.request.POST.get('sensor_13') else None
-            sensor_14 = int(self.request.POST.get('sensor_14')) if self.request.POST.get('sensor_14') else None
-            sensor_15 = int(self.request.POST.get('sensor_15')) if self.request.POST.get('sensor_15') else None
-            sensor_16 = int(self.request.POST.get('sensor_16')) if self.request.POST.get('sensor_16') else None
-            sensor_17 = int(self.request.POST.get('sensor_17')) if self.request.POST.get('sensor_17') else None
-            sensor_18 = int(self.request.POST.get('sensor_18')) if self.request.POST.get('sensor_18') else None
-            sensor_19 = int(self.request.POST.get('sensor_19')) if self.request.POST.get('sensor_19') else None
-            sensor_20 = int(self.request.POST.get('sensor_20'))if self.request.POST.get('sensor_20') else None
+            esp32_id = self.request.GET.get('esp32_id')
+            sensor_1 = int(self.request.GET.get('sensor_1')) if self.request.GET.get('sensor_1') else None
+            sensor_2 = int(self.request.GET.get('sensor_2')) if self.request.GET.get('sensor_2') else None
+            sensor_3 = int(self.request.GET.get('sensor_3')) if self.request.GET.get('sensor_3') else None
+            sensor_4 = int(self.request.GET.get('sensor_4')) if self.request.GET.get('sensor_4') else None
+            sensor_5 = int(self.request.GET.get('sensor_5')) if self.request.GET.get('sensor_5') else None
+            sensor_6 = int(self.request.GET.get('sensor_6')) if self.request.GET.get('sensor_6') else None
+            sensor_7 = int(self.request.GET.get('sensor_7')) if self.request.GET.get('sensor_7') else None
+            sensor_8 = int(self.request.GET.get('sensor_8')) if self.request.GET.get('sensor_8') else None
+            sensor_9 = int(self.request.GET.get('sensor_9')) if self.request.GET.get('sensor_9') else None
+            sensor_10 = int(self.request.GET.get('sensor_10')) if self.request.GET.get('sensor_10') else None
+            sensor_11 = int(self.request.GET.get('sensor_11')) if self.request.GET.get('sensor_11') else None
+            sensor_12 = int(self.request.GET.get('sensor_12')) if self.request.GET.get('sensor_12') else None
+            sensor_13 = int(self.request.GET.get('sensor_13')) if self.request.GET.get('sensor_13') else None
+            sensor_14 = int(self.request.GET.get('sensor_14')) if self.request.GET.get('sensor_14') else None
+            sensor_15 = int(self.request.GET.get('sensor_15')) if self.request.GET.get('sensor_15') else None
+            sensor_16 = int(self.request.GET.get('sensor_16')) if self.request.GET.get('sensor_16') else None
+            sensor_17 = int(self.request.GET.get('sensor_17')) if self.request.GET.get('sensor_17') else None
+            sensor_18 = int(self.request.GET.get('sensor_18')) if self.request.GET.get('sensor_18') else None
+            sensor_19 = int(self.request.GET.get('sensor_19')) if self.request.GET.get('sensor_19') else None
+            sensor_20 = int(self.request.GET.get('sensor_20'))if self.request.GET.get('sensor_20') else None
             altura = ((
                 sensor_1 + sensor_2 + sensor_3 + sensor_4 + sensor_5 + sensor_6 + sensor_7 + sensor_8 + sensor_9 +
                 sensor_10 + sensor_11 + sensor_12 + sensor_13 + sensor_14 + sensor_15 + sensor_16 + sensor_17
                 + sensor_18 + sensor_19 + sensor_20) * 0.20)
+            esp32_id = core.models.Esp32.objects.filter(id=esp32_id).first()
             dat_medicao = datetime.datetime.now()
             medicao = core.models.MedicoesRio()
             medicao.altura = altura
-            medicao.esp32_id = core.models.Esp32.objects.filter(id=esp32_id).first()
+            medicao.esp32_id = esp32_id
             medicao.dat_medicao = dat_medicao
             medicao.save()
+            # if altura >= 2:
+            #     ls_usuarios_cadastrados = core.models.RioUsuario.objects.filter(esp32_id.rio_id).values_list('usuario__email', flat=True)
+            #     for usuario in ls_usuarios_cadastrados:
+            #         pass
             response = {'status': True}
         except Exception as e:
-            response = {'status': False}
+            response = {'status': False, 'descricao': e}
         return JsonResponse(response, safe=False)
+
+
+    def enviar_email(self, email, rio):
+        pass
