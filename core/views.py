@@ -1,11 +1,13 @@
 import datetime
-import smtplib
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from .forms import SignUpForm, LoginForm, RiosForm
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Create your views here.
 from django.views import View
@@ -167,10 +169,26 @@ class EnvioDados(View):
             medicao.esp32_id = esp32_id
             medicao.dat_medicao = dat_medicao
             medicao.save()
-            # if altura >= 2:
-            #     ls_usuarios_cadastrados = core.models.RioUsuario.objects.filter(esp32_id.rio_id).values_list('usuario__email', flat=True)
-            #     for usuario in ls_usuarios_cadastrados:
-            #         pass
+            if altura >= 2:
+                ls_usuarios_cadastrados = list(core.models.RioUsuario.objects.filter(rio_id=esp32_id.rio_id).values_list('usuario__email', flat=True))
+                for usuario in ls_usuarios_cadastrados:
+                    smtp_server = 'smtp.gmail.com'
+                    smtp_port = 587
+                    sender_email = 'ivan.nakatani@gmail.com'
+                    sender_password = 'rzcyvhigaxgaqdsw'
+                    recipient_email = usuario
+                    email_subject = f'Risco de alagamento no {esp32_id.rio.nome}'
+                    email_body = f'Atenção! Foi detectado altos níveis de água no {esp32_id.rio.nome}, mantenha-se alerta para o risco de alamentos!'
+                    message = MIMEMultipart()
+                    message['From'] = sender_email
+                    message['To'] = recipient_email
+                    message['Subject'] = email_subject
+                    message.attach(MIMEText(email_body, 'plain'))
+                    server = smtplib.SMTP(smtp_server, smtp_port)
+                    server.starttls()
+                    server.login(sender_email, sender_password)
+                    server.send_message(message)
+                    server.quit()
             response = {'status': True}
         except Exception as e:
             response = {'status': False, 'descricao': [esp32_id, sensor_1]}
